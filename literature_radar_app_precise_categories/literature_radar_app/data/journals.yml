@@ -123,6 +123,15 @@ journals:
     group: medical_global_health
     sources: ["pubmed", "crossref"]
 
+  - name: Social Science & Medicine
+    aliases:
+      - Social Science and Medicine
+      - Social Science & Medicine
+      - Soc Sci Med
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+    
   - name: The Lancet Global Health
     aliases: ["Lancet Global Health"]
     group: medical_global_health
