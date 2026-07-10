@@ -198,7 +198,7 @@ def _render_paper_cards(df, page_key: str) -> None:
         venue_group = str(row.get("venue_group", "") or "")
         date = str(row.get("published_date", "") or "")
         authors = str(row.get("authors", "") or "")
-        abstract = _short_text(row.get("abstract", ""), 800)
+        abstract = str(row.get("abstract", "") or "").strip()
         url = _best_link(row)
         bibtex = _make_bibtex(row)
 
