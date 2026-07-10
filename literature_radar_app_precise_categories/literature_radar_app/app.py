@@ -16,7 +16,7 @@ apply_global_style()
 hero(
     "Literature Radar",
     "A simple dashboard to track new papers relevant to our research group.",
-    "TUM · Sudharsanan Group",
+    "TUM · Behavioral Sciences in Prevention and Care",
 )
 
 init_db()
