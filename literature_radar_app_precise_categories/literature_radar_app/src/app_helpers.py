@@ -402,7 +402,7 @@ def _render_page_body(df: pd.DataFrame, page_key: str):
 
     view = st.radio(
         "Display mode",
-        ["Readable cards", "Compact table", "BibTeX table"],
+        ["Readable cards", "Compact table"],
         horizontal=True,
         key=f"{page_key}_display_mode",
     )
