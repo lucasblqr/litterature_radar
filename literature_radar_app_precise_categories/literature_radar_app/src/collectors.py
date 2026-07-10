@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 import requests
 
 from .utils import clean_text, journal_matches, make_unique_key, parse_date, safe_date_from_parts
-
+from .abstract_fetcher import enrich_missing_abstract
 
 CROSSREF_URL = "https://api.crossref.org/works"
 PUBMED_ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
@@ -241,7 +241,11 @@ def collect_for_journal(journal: dict[str, Any], start: date, end: date) -> list
             elif not old.get("abstract") and paper.get("abstract"):
                 deduped[key] = paper
 
-    return list(deduped.values())
+        enriched = []
+    for paper in deduped.values():
+        enriched.append(enrich_missing_abstract(paper))
+
+    return enriched
 
 
 def collect_all(journals: list[dict[str, Any]], days: int = 25) -> list[dict[str, Any]]:
@@ -254,8 +258,16 @@ def collect_all(journals: list[dict[str, Any]], days: int = 25) -> list[dict[str
         all_papers.extend(collect_for_journal(journal, start, end))
 
     deduped = {}
-    for paper in all_papers:
+    f    for paper in all_papers:
         key = paper["unique_key"]
         if key not in deduped:
             deduped[key] = paper
+        elif not deduped[key].get("abstract") and paper.get("abstract"):
+            deduped[key] = paper
+
     return list(deduped.values())
+
+
+
+
+
