@@ -416,7 +416,6 @@ def _render_page_body(df: pd.DataFrame, page_key: str):
     else:
         _render_bibtex_table(df, page_key)
 
-    _open_selector(df, page_key)
     _render_review_status(df, page_key)
 
 
@@ -512,7 +511,6 @@ def render_all_papers_page():
     else:
         _render_bibtex_table(df, "all")
 
-    _open_selector(df, "all")
 
 
 def render_rules_page():
