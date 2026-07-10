@@ -1,19 +1,20 @@
 from __future__ import annotations
 
 import time
+import xml.etree.ElementTree as ET
 from datetime import date, datetime, timedelta
 from typing import Any
 from urllib.parse import urlencode
 
 import requests
 
-from .utils import clean_text, journal_matches, make_unique_key, parse_date, safe_date_from_parts
 from .abstract_fetcher import enrich_missing_abstract
+from .utils import clean_text, journal_matches, make_unique_key, parse_date, safe_date_from_parts
+
 
 CROSSREF_URL = "https://api.crossref.org/works"
 PUBMED_ESEARCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 PUBMED_ESUMMARY_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
-
 PUBMED_EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 
@@ -52,8 +53,10 @@ def _authors_from_crossref(item: dict[str, Any]) -> str:
         name = " ".join([given, family]).strip()
         if name:
             authors.append(name)
+
     if len(item.get("author", [])) > 8:
         authors.append("et al.")
+
     return ", ".join(authors)
 
 
@@ -80,6 +83,7 @@ def _extract_crossref_item(item: dict[str, Any], journal: dict[str, Any]) -> dic
     doi = clean_text(item.get("DOI", ""))
     url = _article_url(clean_text(item.get("URL", "")), doi=doi)
     published_date = _published_date_from_crossref(item)
+    abstract = clean_text(item.get("abstract", ""))
 
     return {
         "unique_key": make_unique_key(doi, title, journal_name),
@@ -92,7 +96,7 @@ def _extract_crossref_item(item: dict[str, Any], journal: dict[str, Any]) -> dic
         "url": url,
         "published_date": published_date,
         "authors": _authors_from_crossref(item),
-        "abstract": clean_text(item.get("abstract", "")),
+        "abstract": abstract,
         "fetched_at": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
     }
 
@@ -120,6 +124,7 @@ def fetch_crossref(journal: dict[str, Any], start: date, end: date, rows: int = 
         paper = _extract_crossref_item(item, journal)
         if paper:
             papers.append(paper)
+
     time.sleep(0.2)
     return papers
 
@@ -137,19 +142,75 @@ def _authors_from_pubmed(summary: dict[str, Any]) -> str:
         name = clean_text(a.get("name", ""))
         if name:
             authors.append(name)
+
     if len(summary.get("authors", [])) > 8:
         authors.append("et al.")
+
     return ", ".join(authors)
+
+
+def _abstracts_from_pubmed(ids: list[str], session: requests.Session) -> dict[str, str]:
+    if not ids:
+        return {}
+
+    params = {
+        "db": "pubmed",
+        "id": ",".join(ids),
+        "retmode": "xml",
+    }
+
+    try:
+        r = session.get(PUBMED_EFETCH_URL, params=params, timeout=30)
+        r.raise_for_status()
+        root = ET.fromstring(r.content)
+    except Exception as exc:
+        print(f"[PubMed abstract fetch] {exc}")
+        return {}
+
+    abstracts = {}
+
+    for article in root.findall(".//PubmedArticle"):
+        pmid_el = article.find(".//MedlineCitation/PMID")
+        if pmid_el is None or not pmid_el.text:
+            continue
+
+        pmid = pmid_el.text.strip()
+        parts = []
+
+        for node in article.findall(".//Abstract/AbstractText"):
+            label = clean_text(node.attrib.get("Label", ""))
+            text = clean_text(" ".join(node.itertext()))
+
+            if not text:
+                continue
+
+            if label:
+                parts.append(f"{label}: {text}")
+            else:
+                parts.append(text)
+
+        abstract = clean_text(" ".join(parts))
+        if abstract:
+            abstracts[pmid] = abstract
+
+    return abstracts
 
 
 def fetch_pubmed(journal: dict[str, Any], start: date, end: date, retmax: int = 200) -> list[dict[str, Any]]:
     journal_terms = [journal.get("name", "")]
     journal_terms.extend(journal.get("aliases", []) or [])
+
     if journal.get("short_name"):
         journal_terms.append(journal["short_name"])
 
-    journal_query = " OR ".join([f'"{j}"[Journal]' for j in journal_terms if j])
-    term = f"({journal_query}) AND ({start.strftime('%Y/%m/%d')}[Date - Publication] : {end.strftime('%Y/%m/%d')}[Date - Publication])"
+    journal_terms = [j for j in journal_terms if j]
+    journal_query = " OR ".join([f'"{j}"[Journal]' for j in journal_terms])
+
+    term = (
+        f"({journal_query}) AND "
+        f"({start.strftime('%Y/%m/%d')}[Date - Publication] : "
+        f"{end.strftime('%Y/%m/%d')}[Date - Publication])"
+    )
 
     search_params = {
         "db": "pubmed",
@@ -178,6 +239,7 @@ def fetch_pubmed(journal: dict[str, Any], start: date, end: date, retmax: int = 
             "id": ",".join(ids),
             "retmode": "json",
         }
+
         r = s.get(PUBMED_ESUMMARY_URL, params=summary_params, timeout=30)
         r.raise_for_status()
         data = r.json().get("result", {})
@@ -185,11 +247,14 @@ def fetch_pubmed(journal: dict[str, Any], start: date, end: date, retmax: int = 
         print(f"[PubMed summary] {journal.get('name')}: {exc}")
         return []
 
+    abstracts_by_pmid = _abstracts_from_pubmed(ids, s)
+
     papers = []
     for pmid in ids:
         item = data.get(pmid)
         if not item:
             continue
+
         title = clean_text(item.get("title", ""))
         if not title:
             continue
@@ -210,7 +275,7 @@ def fetch_pubmed(journal: dict[str, Any], start: date, end: date, retmax: int = 
                 "url": _article_url(doi=doi, pmid=pmid),
                 "published_date": pubdate.isoformat() if pubdate else None,
                 "authors": _authors_from_pubmed(item),
-                "abstract": "",
+                "abstract": abstracts_by_pmid.get(pmid, ""),
                 "fetched_at": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
             }
         )
@@ -222,26 +287,33 @@ def fetch_pubmed(journal: dict[str, Any], start: date, end: date, retmax: int = 
 def collect_for_journal(journal: dict[str, Any], start: date, end: date) -> list[dict[str, Any]]:
     papers = []
     sources = journal.get("sources", ["crossref"])
+
     if "pubmed" in sources:
         papers.extend(fetch_pubmed(journal, start, end))
+
     if "crossref" in sources:
         papers.extend(fetch_crossref(journal, start, end))
 
     deduped = {}
+
     for paper in papers:
         if not paper.get("published_date"):
             continue
+
         key = paper["unique_key"]
+
         if key not in deduped:
             deduped[key] = paper
-        else:
-            old = deduped[key]
-            if old.get("source") == "crossref" and paper.get("source") == "pubmed":
-                deduped[key] = paper
-            elif not old.get("abstract") and paper.get("abstract"):
-                deduped[key] = paper
+            continue
 
-        enriched = []
+        old = deduped[key]
+
+        if not old.get("abstract") and paper.get("abstract"):
+            deduped[key] = paper
+        elif old.get("source") == "crossref" and paper.get("source") == "pubmed":
+            deduped[key] = paper
+
+    enriched = []
     for paper in deduped.values():
         enriched.append(enrich_missing_abstract(paper))
 
@@ -258,13 +330,20 @@ def collect_all(journals: list[dict[str, Any]], days: int = 25) -> list[dict[str
         all_papers.extend(collect_for_journal(journal, start, end))
 
     deduped = {}
-    f    for paper in all_papers:
+
+    for paper in all_papers:
         key = paper["unique_key"]
+
         if key not in deduped:
             deduped[key] = paper
-        elif not deduped[key].get("abstract") and paper.get("abstract"):
+            continue
+
+        old = deduped[key]
+
+        if not old.get("abstract") and paper.get("abstract"):
             deduped[key] = paper
 
+    return list(deduped.values())
     return list(deduped.values())
 
 
