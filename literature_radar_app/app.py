@@ -1,68 +1,157 @@
 from __future__ import annotations
 
-import subprocess
-import sys
+import sqlite3
 from pathlib import Path
 
 import streamlit as st
 
-from src.database import count_papers, get_latest_update, init_db
-from src.ui import apply_global_style, hero, soft_note
+from src.config import DB_PATH
+
+try:
+    from src.ui import apply_global_style
+except Exception:
+    apply_global_style = None
 
 
-st.set_page_config(page_title="Literature Radar", layout="wide")
-apply_global_style()
-
-hero(
-    "Literature Radar",
-    "A simple dashboard to track new papers relevant to our research group.",
-    "TUM · Behavioral Sciences in Prevention and Care",
+st.set_page_config(
+    page_title="Literature Radar",
+    page_icon="📚",
+    layout="wide",
 )
 
-init_db()
+if apply_global_style:
+    apply_global_style()
 
-c1, c2 = st.columns(2)
+
+def read_metrics() -> dict[str, int | str]:
+    if not Path(DB_PATH).exists():
+        return {
+            "papers": 0,
+            "with_abstract": 0,
+            "saved": 0,
+            "latest_update": "Not available",
+        }
+
+    with sqlite3.connect(DB_PATH) as conn:
+        total = conn.execute("SELECT COUNT(*) FROM papers").fetchone()[0]
+
+        with_abstract = conn.execute(
+            "SELECT COUNT(*) FROM papers WHERE COALESCE(TRIM(abstract), '') != ''"
+        ).fetchone()[0]
+
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(papers)").fetchall()]
+        keep_cols = [c for c in cols if c.startswith("keep_")]
+
+        saved = 0
+        if keep_cols:
+            saved_expr = " + ".join([f"COALESCE({c}, 0)" for c in keep_cols])
+            saved = conn.execute(
+                f"SELECT COUNT(*) FROM papers WHERE ({saved_expr}) > 0"
+            ).fetchone()[0]
+
+        latest_update = "Not available"
+        if "fetched_at" in cols:
+            latest_update = conn.execute(
+                "SELECT MAX(fetched_at) FROM papers WHERE COALESCE(TRIM(fetched_at), '') != ''"
+            ).fetchone()[0] or "Not available"
+
+    return {
+        "papers": total,
+        "with_abstract": with_abstract,
+        "saved": saved,
+        "latest_update": latest_update,
+    }
+
+
+metrics = read_metrics()
+
+st.title("📚 Literature Radar")
+st.write(
+    "A shared dashboard to find, read, and save papers that may be relevant for our research group."
+)
+
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("Papers in database", f"{metrics['papers']:,}")
+m2.metric("With abstracts", f"{metrics['with_abstract']:,}")
+m3.metric("Saved by team", f"{metrics['saved']:,}")
+m4.metric("Latest update", str(metrics["latest_update"])[:10])
+
+st.markdown("### Main sections")
+
+c1, c2, c3 = st.columns(3)
+
 with c1:
-    st.metric("Papers in database", count_papers())
+    st.markdown("**Research topics**")
+    st.write("Preventive care")
+    st.write("Hypertension")
+    st.write("Mental models in health")
+
 with c2:
-    st.metric("Last update", get_latest_update() or "Never")
+    st.markdown("**Journal families**")
+    st.write("Econ journals")
+    st.write("Health journals")
+    st.write("General science journals")
 
-st.markdown("### Pages")
+with c3:
+    st.markdown("**Team reading**")
+    st.write("Personal lists")
+    st.write("Team favorites")
+    st.write("Recent papers")
 
-st.page_link("pages/1_Strongly_Connected.py", label="Strongly connected to our work")
-st.page_link("pages/2_Econ_Journals_Related.py", label="Econ papers related to our work")
-st.page_link("pages/3_Health_Journals_Related.py", label="Health papers related to our work")
-st.page_link("pages/4_More_Random_Interesting.py", label="More random but interesting papers")
-st.page_link("pages/5_Preventive_Care.py", label="Preventive care")
-st.page_link("pages/6_Hypertension.py", label="Hypertension")
-st.page_link("pages/7_Mental_Models_Health.py", label="Mental models in health")
-st.page_link("pages/8_All_Papers.py", label="All papers")
-st.page_link("pages/9_Journal_Groups_and_Rules.py", label="Journal groups and rules")
+st.markdown("### Journal coverage")
 
-st.markdown("### Update")
+with st.expander("Econ and development journals", expanded=False):
+    st.markdown(
+        """
+- American Economic Review
+- Quarterly Journal of Economics
+- Journal of Political Economy
+- Econometrica
+- Review of Economics and Statistics
+- American Economic Journal: Applied Economics
+- AER Insights
+- Journal of Development Economics
+"""
+    )
 
-days = st.number_input(
-    "Collect papers from the last N days",
-    min_value=1,
-    max_value=365,
-    value=60,
-    step=1,
+with st.expander("Health economics journals", expanded=False):
+    st.markdown(
+        """
+- Journal of Health Economics
+- Health Economics
+- American Journal of Health Economics
+- European Journal of Health Economics
+"""
+    )
+
+with st.expander("Medical and global health journals", expanded=False):
+    st.markdown(
+        """
+- BMJ Global Health
+- The Lancet Global Health
+- PLOS Medicine
+- Social Science & Medicine
+- JAMA
+- JAMA Network Open
+- BMJ
+- The Lancet
+- New England Journal of Medicine
+- Nature Medicine
+"""
+    )
+
+with st.expander("General science and interdisciplinary journals", expanded=False):
+    st.markdown(
+        """
+- Nature
+- Nature Human Behaviour
+- Science
+- Science Advances
+- Science Translational Medicine
+- PNAS
+"""
+    )
+
+st.info(
+    "Use the pages in the sidebar to browse papers. Personal notes and saved lists are stored in papers.db."
 )
-
-if st.button("Run literature update"):
-    with st.spinner("Collecting papers..."):
-        result = subprocess.run(
-            [sys.executable, "scripts/update_papers.py", "--days", str(int(days))],
-            cwd=Path(__file__).resolve().parent,
-            capture_output=True,
-            text=True,
-        )
-
-    if result.returncode == 0:
-        st.success("Update completed.")
-        st.rerun()
-    else:
-        st.error("Update failed.")
-        st.code(result.stdout + "\n" + result.stderr)
-
-soft_note("The app collects public metadata and links. It does not download full-text articles.")
