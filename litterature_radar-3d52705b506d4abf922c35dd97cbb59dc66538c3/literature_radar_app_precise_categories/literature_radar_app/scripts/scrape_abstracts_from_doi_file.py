@@ -21,7 +21,6 @@ ABSTRACT_SELECTORS = [
     "meta[name='dc.description']",
     "meta[name='description']",
     "meta[property='og:description']",
-
     "section#abstract",
     "section.abstract",
     "div.abstract",
@@ -29,7 +28,6 @@ ABSTRACT_SELECTORS = [
     "div.section.abstract",
     "div.article-section.abstract",
     "div.fulltext-view div.abstract",
-
     "section.article-header__abstract",
     "section.article-section__abstract",
     "section#article-section-abstract",
@@ -133,6 +131,42 @@ def normalize_doi_or_url(value: str) -> str:
     return value
 
 
+def format_lancet_pii(raw_pii: str) -> list[str]:
+    raw_pii = clean_text(raw_pii)
+    out = []
+
+    if raw_pii:
+        out.append(raw_pii)
+
+    compact = re.sub(r"[^A-Za-z0-9]", "", raw_pii)
+
+    if len(compact) >= 17 and compact.upper().startswith("S"):
+        issn = compact[1:9]
+        year = compact[9:11]
+        article = compact[11:16]
+        check = compact[16]
+
+        formatted = f"S{issn[:4]}-{issn[4:]}({year}){article}-{check}"
+        out.append(formatted)
+
+    final = []
+    for item in out:
+        if item and item not in final:
+            final.append(item)
+
+    return final
+
+
+def add_lancet_urls(variants: list[str], pii: str) -> None:
+    for pii_variant in format_lancet_pii(pii):
+        variants.append(
+            f"https://www.thelancet.com/journals/langlo/article/PII{pii_variant}/fulltext"
+        )
+        variants.append(
+            f"https://www.thelancet.com/journals/langlo/article/PII{pii_variant}/fulltext?rss=yes"
+        )
+
+
 def url_variants(url: str) -> list[str]:
     base = url.split("#")[0].rstrip("/")
     variants = [base]
@@ -156,13 +190,7 @@ def url_variants(url: str) -> list[str]:
     )
 
     if doi_match:
-        doi_suffix = doi_match.group(1)
-        variants.append(
-            f"https://www.thelancet.com/journals/langlo/article/PII{doi_suffix}/fulltext"
-        )
-        variants.append(
-            f"https://www.thelancet.com/journals/langlo/article/PII{doi_suffix}/fulltext?rss=yes"
-        )
+        add_lancet_urls(variants, doi_match.group(1))
 
     pii_match = re.search(
         r"/retrieve/pii/(S[0-9A-Z]+)",
@@ -171,13 +199,7 @@ def url_variants(url: str) -> list[str]:
     )
 
     if pii_match:
-        clean_pii = pii_match.group(1)
-        variants.append(
-            f"https://www.thelancet.com/journals/langlo/article/PII{clean_pii}/fulltext"
-        )
-        variants.append(
-            f"https://www.thelancet.com/journals/langlo/article/PII{clean_pii}/fulltext?rss=yes"
-        )
+        add_lancet_urls(variants, pii_match.group(1))
 
     out = []
     for v in variants:
@@ -185,6 +207,7 @@ def url_variants(url: str) -> list[str]:
             out.append(v)
 
     return out
+
 
 def extract_from_meta_or_selectors(soup: BeautifulSoup) -> str:
     for selector in ABSTRACT_SELECTORS:
@@ -275,7 +298,6 @@ def scrape_abstract(url: str, session: requests.Session) -> dict:
         r = session.get(start_url, timeout=30, allow_redirects=True)
         r.raise_for_status()
         final_url = r.url
-        html = r.text
     except Exception as exc:
         return {
             "input": url,
@@ -284,7 +306,12 @@ def scrape_abstract(url: str, session: requests.Session) -> dict:
             "status": f"could not open DOI: {exc}",
         }
 
-    candidates = []  for candidate_url in [start_url, final_url]:     for variant in url_variants(candidate_url):         if variant not in candidates:             candidates.append(variant)
+    candidates = []
+
+    for candidate_url in [start_url, final_url]:
+        for variant in url_variants(candidate_url):
+            if variant not in candidates:
+                candidates.append(variant)
 
     for candidate in candidates:
         tried.append(candidate)
