@@ -16,6 +16,7 @@ def apply_global_style() -> None:
             --radar-text: #172033;
             --radar-muted: #687083;
             --radar-blue: #244f8f;
+            --radar-blue-hover: #1f447b;
             --radar-blue-soft: #eaf1fb;
             --radar-green: #216e5a;
             --radar-green-soft: #e9f5f1;
@@ -206,38 +207,6 @@ def apply_global_style() -> None:
             font-weight: 850;
         }
 
-        input,
-        textarea,
-        div[data-baseweb="select"] *,
-        div[data-baseweb="input"] * {
-            color: #172033 !important;
-            background-color: #ffffff !important;
-        }
-
-        .stButton > button {
-            border-radius: 999px;
-            border: 1px solid rgba(36,79,143,0.24) !important;
-            background: #244f8f !important;
-            color: #ffffff !important;
-            font-weight: 750;
-            padding: 0.56rem 1.08rem;
-            box-shadow: 0 10px 24px rgba(36,79,143,0.20);
-        }
-
-        .stButton > button *,
-        button[kind="primary"],
-        button[kind="primary"] *,
-        button[kind="secondary"],
-        button[kind="secondary"] * {
-            color: #ffffff !important;
-        }
-
-        .stButton > button:hover {
-            border: 1px solid rgba(36,79,143,0.4) !important;
-            background: #1f447b !important;
-            color: #ffffff !important;
-        }
-
         div[data-testid="stDataFrame"],
         div[data-testid="stDataEditor"] {
             border-radius: 18px;
@@ -268,10 +237,7 @@ def apply_global_style() -> None:
             color: #687083 !important;
         }
 
-        a,
-        a *,
-        [data-testid="stPageLink"] *,
-        [data-testid="stSidebarNav"] * {
+        a {
             color: #244f8f !important;
             text-decoration: none !important;
         }
@@ -280,7 +246,7 @@ def apply_global_style() -> None:
             border-color: #e7e9f0 !important;
         }
 
-        /* Fix black clickable blocks, especially Filters expanders */
+        /* Expander / Filters fix */
         div[data-testid="stExpander"] {
             background-color: #ffffff !important;
             border: 1px solid #d8dee9 !important;
@@ -319,7 +285,7 @@ def apply_global_style() -> None:
             color: #172033 !important;
         }
 
-        /* Fix forms */
+        /* Forms */
         div[data-testid="stForm"] {
             background-color: #ffffff !important;
             border: 1px solid #e7e9f0 !important;
@@ -332,7 +298,7 @@ def apply_global_style() -> None:
             color: #172033 !important;
         }
 
-        /* Fix input boxes */
+        /* Input boxes */
         input,
         textarea,
         div[data-baseweb="input"],
@@ -350,7 +316,7 @@ def apply_global_style() -> None:
             opacity: 1 !important;
         }
 
-        /* Fix select boxes and dropdowns */
+        /* Select boxes and dropdowns */
         div[data-baseweb="select"] > div {
             background-color: #ffffff !important;
             color: #172033 !important;
@@ -383,30 +349,69 @@ def apply_global_style() -> None:
             color: #172033 !important;
         }
 
-        /* Fix checkboxes and radio buttons */
-        div[data-testid="stCheckbox"],
-        div[data-testid="stCheckbox"] *,
-        div[data-testid="stRadio"],
-        div[data-testid="stRadio"] * {
+        /* Checkbox fix */
+        div[data-testid="stCheckbox"] {
             color: #172033 !important;
         }
 
+        div[data-testid="stCheckbox"] *,
         div[data-testid="stCheckbox"] label,
+        div[data-testid="stCheckbox"] label * {
+            color: #172033 !important;
+        }
+
+        div[data-testid="stCheckbox"] div[role="checkbox"],
+        div[data-testid="stCheckbox"] [role="checkbox"] {
+            background-color: #ffffff !important;
+            border: 2px solid #244f8f !important;
+            border-radius: 5px !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stCheckbox"] div[role="checkbox"][aria-checked="true"],
+        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] {
+            background-color: #244f8f !important;
+            border-color: #244f8f !important;
+        }
+
+        div[data-testid="stCheckbox"] div[role="checkbox"][aria-checked="true"] *,
+        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] * {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+
+        div[data-testid="stCheckbox"] svg {
+            color: #ffffff !important;
+            fill: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+
+        label[data-baseweb="checkbox"] > div:first-child {
+            background-color: #ffffff !important;
+            border: 2px solid #244f8f !important;
+            border-radius: 5px !important;
+        }
+
+        label[data-baseweb="checkbox"] > div:first-child[aria-checked="true"] {
+            background-color: #244f8f !important;
+            border-color: #244f8f !important;
+        }
+
+        /* Radio buttons */
+        div[data-testid="stRadio"],
+        div[data-testid="stRadio"] *,
         div[data-testid="stRadio"] label {
             color: #172033 !important;
         }
 
-        /* Fix sliders */
+        /* Sliders */
         div[data-testid="stSlider"],
         div[data-testid="stSlider"] * {
             color: #172033 !important;
         }
 
-        div[data-testid="stSlider"] div {
-            color: #172033 !important;
-        }
-
-        /* Fix tabs */
+        /* Tabs */
         button[data-baseweb="tab"] {
             background-color: transparent !important;
             color: #172033 !important;
@@ -427,25 +432,80 @@ def apply_global_style() -> None:
             color: #244f8f !important;
         }
 
-        /* Fix link buttons specifically */
-        a[data-testid="stLinkButton"] {
-            background-color: #244f8f !important;
-            color: #ffffff !important;
+        /* Normal Streamlit buttons */
+        .stButton > button,
+        div[data-testid="stButton"] button,
+        button[kind="primary"],
+        button[kind="secondary"],
+        button[data-testid="baseButton-primary"],
+        button[data-testid="baseButton-secondary"] {
             border-radius: 999px !important;
             border: 1px solid rgba(36,79,143,0.24) !important;
+            background-color: #244f8f !important;
+            color: #ffffff !important;
+            font-weight: 750 !important;
+            padding: 0.56rem 1.08rem !important;
+            box-shadow: 0 10px 24px rgba(36,79,143,0.20) !important;
+        }
+
+        .stButton > button *,
+        div[data-testid="stButton"] button *,
+        button[kind="primary"] *,
+        button[kind="secondary"] *,
+        button[data-testid="baseButton-primary"] *,
+        button[data-testid="baseButton-secondary"] * {
+            color: #ffffff !important;
+        }
+
+        .stButton > button:hover,
+        div[data-testid="stButton"] button:hover,
+        button[kind="primary"]:hover,
+        button[kind="secondary"]:hover,
+        button[data-testid="baseButton-primary"]:hover,
+        button[data-testid="baseButton-secondary"]:hover {
+            background-color: #1f447b !important;
+            color: #ffffff !important;
+            border-color: rgba(36,79,143,0.4) !important;
+        }
+
+        /* Open paper link button fix */
+        div[data-testid="stLinkButton"] a,
+        div[data-testid="stLinkButton"] a:visited,
+        div[data-testid="stLinkButton"] a:hover,
+        div[data-testid="stLinkButton"] a:active,
+        a[data-testid="stLinkButton"],
+        a[data-testid="stLinkButton"]:visited,
+        a[data-testid="stLinkButton"]:hover,
+        a[data-testid="stLinkButton"]:active {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 999px !important;
+            border: 1px solid rgba(36,79,143,0.24) !important;
+            background-color: #244f8f !important;
+            color: #ffffff !important;
+            font-weight: 750 !important;
+            padding: 0.56rem 1.08rem !important;
+            box-shadow: 0 10px 24px rgba(36,79,143,0.20) !important;
             text-decoration: none !important;
         }
 
-        a[data-testid="stLinkButton"] * {
+        div[data-testid="stLinkButton"] a *,
+        a[data-testid="stLinkButton"] *,
+        div[data-testid="stLinkButton"] p,
+        div[data-testid="stLinkButton"] span {
             color: #ffffff !important;
         }
 
+        div[data-testid="stLinkButton"] a:hover,
         a[data-testid="stLinkButton"]:hover {
             background-color: #1f447b !important;
             color: #ffffff !important;
+            border-color: rgba(36,79,143,0.4) !important;
+            text-decoration: none !important;
         }
 
-        /* Fix navigation hover / selected states */
+        /* Sidebar navigation */
         [data-testid="stSidebarNav"] a,
         [data-testid="stSidebarNav"] a * {
             color: #172033 !important;
