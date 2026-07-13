@@ -432,17 +432,21 @@ def render_paper_list(
         render_dataframe_summary(df)
         return
 
-    upper = min(max_cards, max(5, len(df)))
-    default = min(20, len(df), max_cards)
+    total = len(df)
+    upper = min(max_cards, total)
 
-    n = st.slider(
-        "Number of papers to show",
-        min_value=5,
-        max_value=upper,
-        value=max(5, default),
-        step=5,
-        key=f"{key_prefix}_n",
-    )
+    if upper <= 5:
+        n = upper
+        st.caption(f"Showing all {n} papers.")
+    else:
+        n = st.slider(
+            "Number of papers to show",
+            min_value=1,
+            max_value=upper,
+            value=min(20, upper),
+            step=1,
+            key=f"{key_prefix}_n",
+        )
 
     for _, row in df.head(n).iterrows():
         render_paper_card(
@@ -451,7 +455,6 @@ def render_paper_list(
             show_save_box=show_save_box,
             show_all_notes=show_all_notes,
         )
-
 
 def render_journal_family_page(
     title: str,
