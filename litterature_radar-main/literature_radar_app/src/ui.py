@@ -26,7 +26,9 @@ def apply_global_style() -> None:
             --radar-purple-soft: #f0ebfa;
         }
 
-        html, body, .stApp {
+        html,
+        body,
+        .stApp {
             background: #f6f7fb !important;
             color: #172033 !important;
         }
@@ -60,7 +62,7 @@ def apply_global_style() -> None:
 
         section[data-testid="stSidebar"] {
             background: #ffffff !important;
-            border-right: 1px solid var(--radar-border);
+            border-right: 1px solid var(--radar-border) !important;
         }
 
         section[data-testid="stSidebar"],
@@ -68,7 +70,9 @@ def apply_global_style() -> None:
             color: #172033 !important;
         }
 
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             letter-spacing: -0.02em;
             color: #172033 !important;
         }
@@ -83,9 +87,9 @@ def apply_global_style() -> None:
         }
 
         .block-container {
-            padding-top: 2rem;
-            padding-bottom: 3rem;
-            max-width: 1500px;
+            padding-top: 2rem !important;
+            padding-bottom: 3rem !important;
+            max-width: 1500px !important;
         }
 
         .radar-hero {
@@ -186,10 +190,10 @@ def apply_global_style() -> None:
 
         div[data-testid="stMetric"] {
             background: #ffffff !important;
-            border: 1px solid var(--radar-border);
-            border-radius: 18px;
-            padding: 1rem 1.1rem;
-            box-shadow: 0 12px 28px rgba(30, 42, 70, 0.05);
+            border: 1px solid var(--radar-border) !important;
+            border-radius: 18px !important;
+            padding: 1rem 1.1rem !important;
+            box-shadow: 0 12px 28px rgba(30, 42, 70, 0.05) !important;
         }
 
         div[data-testid="stMetric"],
@@ -199,25 +203,25 @@ def apply_global_style() -> None:
 
         div[data-testid="stMetric"] label {
             color: #687083 !important;
-            font-weight: 700;
+            font-weight: 700 !important;
         }
 
         div[data-testid="stMetricValue"] {
             color: #172033 !important;
-            font-weight: 850;
+            font-weight: 850 !important;
         }
 
         div[data-testid="stDataFrame"],
         div[data-testid="stDataEditor"] {
-            border-radius: 18px;
-            overflow: hidden;
-            border: 1px solid var(--radar-border);
-            box-shadow: 0 12px 28px rgba(30, 42, 70, 0.05);
+            border-radius: 18px !important;
+            overflow: hidden !important;
+            border: 1px solid var(--radar-border) !important;
+            box-shadow: 0 12px 28px rgba(30, 42, 70, 0.05) !important;
             background: #ffffff !important;
         }
 
         div[data-testid="stAlert"] {
-            border-radius: 16px;
+            border-radius: 16px !important;
         }
 
         div[data-testid="stAlert"],
@@ -246,7 +250,7 @@ def apply_global_style() -> None:
             border-color: #e7e9f0 !important;
         }
 
-        /* Expander / Filters fix */
+        /* Expander / filter boxes */
         div[data-testid="stExpander"] {
             background-color: #ffffff !important;
             border: 1px solid #d8dee9 !important;
@@ -279,10 +283,7 @@ def apply_global_style() -> None:
         div[data-testid="stExpander"] svg {
             fill: #172033 !important;
             color: #172033 !important;
-        }
-
-        div[data-testid="stExpander"] div {
-            color: #172033 !important;
+            stroke: #172033 !important;
         }
 
         /* Forms */
@@ -298,16 +299,25 @@ def apply_global_style() -> None:
             color: #172033 !important;
         }
 
-        /* Input boxes */
+        /* Text inputs and text areas */
         input,
         textarea,
         div[data-baseweb="input"],
         div[data-baseweb="textarea"],
-        div[data-baseweb="input"] > div,
-        div[data-baseweb="textarea"] > div {
+        div[data-baseweb="input"] *,
+        div[data-baseweb="textarea"] * {
             background-color: #ffffff !important;
             color: #172033 !important;
             border-color: #d8dee9 !important;
+        }
+
+        input:focus,
+        textarea:focus,
+        div[data-baseweb="input"]:focus-within,
+        div[data-baseweb="textarea"]:focus-within {
+            border-color: #244f8f !important;
+            box-shadow: 0 0 0 1px #244f8f !important;
+            outline: none !important;
         }
 
         input::placeholder,
@@ -316,23 +326,52 @@ def apply_global_style() -> None:
             opacity: 1 !important;
         }
 
-        /* Select boxes and dropdowns */
-        div[data-baseweb="select"] > div {
+        /* Select boxes: force every internal clickable piece to light */
+        div[data-baseweb="select"] {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+        }
+
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="select"] > div > div,
+        div[data-baseweb="select"] div,
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] input {
             background-color: #ffffff !important;
             color: #172033 !important;
             border-color: #d8dee9 !important;
         }
 
-        div[data-baseweb="select"] *,
-        div[data-baseweb="popover"] *,
-        div[data-baseweb="menu"] * {
+        div[data-baseweb="select"] svg,
+        div[data-baseweb="select"] path {
             color: #172033 !important;
+            fill: #172033 !important;
+            stroke: #172033 !important;
+            background-color: transparent !important;
+        }
+
+        div[data-baseweb="select"] [role="button"],
+        div[data-baseweb="select"] [aria-haspopup="listbox"],
+        div[data-baseweb="select"] [data-baseweb="icon"],
+        div[data-baseweb="select"] div:last-child {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+            border-color: #d8dee9 !important;
         }
 
         div[data-baseweb="popover"],
         div[data-baseweb="menu"],
         ul[role="listbox"],
         div[role="listbox"] {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+            border: 1px solid #d8dee9 !important;
+        }
+
+        div[data-baseweb="popover"] *,
+        div[data-baseweb="menu"] *,
+        ul[role="listbox"] *,
+        div[role="listbox"] * {
             background-color: #ffffff !important;
             color: #172033 !important;
         }
@@ -349,18 +388,21 @@ def apply_global_style() -> None:
             color: #172033 !important;
         }
 
-        /* Checkbox fix */
-        div[data-testid="stCheckbox"] {
-            color: #172033 !important;
+        /* Multiselect tags */
+        span[data-baseweb="tag"],
+        span[data-baseweb="tag"] * {
+            background-color: #eaf1fb !important;
+            color: #244f8f !important;
         }
 
+        /* Checkboxes, even if some old pages still use them */
+        div[data-testid="stCheckbox"],
         div[data-testid="stCheckbox"] *,
         div[data-testid="stCheckbox"] label,
         div[data-testid="stCheckbox"] label * {
             color: #172033 !important;
         }
 
-        div[data-testid="stCheckbox"] div[role="checkbox"],
         div[data-testid="stCheckbox"] [role="checkbox"] {
             background-color: #ffffff !important;
             border: 2px solid #244f8f !important;
@@ -368,47 +410,46 @@ def apply_global_style() -> None:
             box-shadow: none !important;
         }
 
-        div[data-testid="stCheckbox"] div[role="checkbox"][aria-checked="true"],
         div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] {
             background-color: #244f8f !important;
             border-color: #244f8f !important;
         }
 
-        div[data-testid="stCheckbox"] div[role="checkbox"][aria-checked="true"] *,
-        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] * {
+        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] *,
+        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] svg,
+        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] path {
             color: #ffffff !important;
             fill: #ffffff !important;
             stroke: #ffffff !important;
         }
 
-        div[data-testid="stCheckbox"] svg {
-            color: #ffffff !important;
-            fill: #ffffff !important;
-            stroke: #ffffff !important;
-        }
-
-        label[data-baseweb="checkbox"] > div:first-child {
-            background-color: #ffffff !important;
-            border: 2px solid #244f8f !important;
-            border-radius: 5px !important;
-        }
-
-        label[data-baseweb="checkbox"] > div:first-child[aria-checked="true"] {
-            background-color: #244f8f !important;
-            border-color: #244f8f !important;
-        }
-
-        /* Radio buttons */
+        /* Radio buttons, even if some old pages still use them */
         div[data-testid="stRadio"],
         div[data-testid="stRadio"] *,
         div[data-testid="stRadio"] label {
             color: #172033 !important;
         }
 
+        div[data-testid="stRadio"] [role="radio"] {
+            background-color: #ffffff !important;
+            border: 2px solid #244f8f !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stRadio"] [role="radio"][aria-checked="true"] {
+            background-color: #244f8f !important;
+            border-color: #244f8f !important;
+        }
+
         /* Sliders */
         div[data-testid="stSlider"],
         div[data-testid="stSlider"] * {
             color: #172033 !important;
+        }
+
+        div[data-testid="stSlider"] [role="slider"] {
+            background-color: #244f8f !important;
+            border-color: #244f8f !important;
         }
 
         /* Tabs */
@@ -432,13 +473,13 @@ def apply_global_style() -> None:
             color: #244f8f !important;
         }
 
-        /* Normal Streamlit buttons */
-        .stButton > button,
+        /* All Streamlit buttons */
         div[data-testid="stButton"] button,
+        div[data-testid="stFormSubmitButton"] button,
+        button[data-testid*="baseButton"],
         button[kind="primary"],
         button[kind="secondary"],
-        button[data-testid="baseButton-primary"],
-        button[data-testid="baseButton-secondary"] {
+        .stButton > button {
             border-radius: 999px !important;
             border: 1px solid rgba(36,79,143,0.24) !important;
             background-color: #244f8f !important;
@@ -448,27 +489,43 @@ def apply_global_style() -> None:
             box-shadow: 0 10px 24px rgba(36,79,143,0.20) !important;
         }
 
-        .stButton > button *,
         div[data-testid="stButton"] button *,
+        div[data-testid="stFormSubmitButton"] button *,
+        button[data-testid*="baseButton"] *,
         button[kind="primary"] *,
         button[kind="secondary"] *,
-        button[data-testid="baseButton-primary"] *,
-        button[data-testid="baseButton-secondary"] * {
+        .stButton > button * {
             color: #ffffff !important;
+            background-color: transparent !important;
         }
 
-        .stButton > button:hover,
         div[data-testid="stButton"] button:hover,
+        div[data-testid="stFormSubmitButton"] button:hover,
+        button[data-testid*="baseButton"]:hover,
         button[kind="primary"]:hover,
         button[kind="secondary"]:hover,
-        button[data-testid="baseButton-primary"]:hover,
-        button[data-testid="baseButton-secondary"]:hover {
+        .stButton > button:hover {
             background-color: #1f447b !important;
             color: #ffffff !important;
             border-color: rgba(36,79,143,0.4) !important;
         }
 
-        /* Open paper link button fix */
+        div[data-testid="stButton"] button:disabled,
+        div[data-testid="stFormSubmitButton"] button:disabled,
+        button[data-testid*="baseButton"]:disabled {
+            background-color: #d8dee9 !important;
+            color: #687083 !important;
+            border-color: #d8dee9 !important;
+            box-shadow: none !important;
+        }
+
+        div[data-testid="stButton"] button:disabled *,
+        div[data-testid="stFormSubmitButton"] button:disabled *,
+        button[data-testid*="baseButton"]:disabled * {
+            color: #687083 !important;
+        }
+
+        /* Open paper link button */
         div[data-testid="stLinkButton"] a,
         div[data-testid="stLinkButton"] a:visited,
         div[data-testid="stLinkButton"] a:hover,
@@ -495,6 +552,7 @@ def apply_global_style() -> None:
         div[data-testid="stLinkButton"] p,
         div[data-testid="stLinkButton"] span {
             color: #ffffff !important;
+            background-color: transparent !important;
         }
 
         div[data-testid="stLinkButton"] a:hover,
