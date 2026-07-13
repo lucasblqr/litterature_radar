@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import hashlib
 import re
 import sqlite3
+from html import escape
 from typing import Iterable
 
 import pandas as pd
@@ -146,6 +148,19 @@ def short_text(value, n: int = 900) -> str:
     return text[: n - 1].rstrip() + "…"
 
 
+def widget_key(value: object) -> str:
+    raw = text_value(value)
+    return hashlib.md5(raw.encode("utf-8")).hexdigest()
+
+
+def normalize_journal(value: object) -> str:
+    text = text_value(value).lower().strip()
+    text = text.replace("&", "and")
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
 def paper_link(row: pd.Series) -> str:
     doi = text_value(row.get("doi", "")).strip()
     url = text_value(row.get("url", "")).strip()
@@ -204,16 +219,12 @@ def add_saved_count(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def filter_by_journals(df: pd.DataFrame, journal_names: Iterable[str]) -> pd.DataFrame:
-    names = [x.lower() for x in journal_names]
+    names = {normalize_journal(x) for x in journal_names if text_value(x).strip()}
 
-    journal = df.get("journal", pd.Series("", index=df.index)).fillna("").str.lower()
-    configured = df.get("configured_journal", pd.Series("", index=df.index)).fillna("").str.lower()
+    journal = df.get("journal", pd.Series("", index=df.index)).apply(normalize_journal)
+    configured = df.get("configured_journal", pd.Series("", index=df.index)).apply(normalize_journal)
 
-    mask = pd.Series(False, index=df.index)
-
-    for name in names:
-        mask = mask | journal.str.contains(re.escape(name), na=False)
-        mask = mask | configured.str.contains(re.escape(name), na=False)
+    mask = journal.isin(names) | configured.isin(names)
 
     return df[mask].copy()
 
@@ -254,20 +265,20 @@ def apply_common_filters(
         c1, c2, c3 = st.columns(3)
 
         with c1:
-            only_abstracts = st.checkbox(
-                "Only papers with abstracts",
-                value=False,
-                key=f"{key_prefix}_abstracts",
+            abstract_choice = st.selectbox(
+                "Abstracts",
+                ["All papers", "Only papers with abstracts"],
+                key=f"{key_prefix}_abstracts_select",
             )
 
         with c2:
-            only_saved = False
+            saved_choice = "All papers"
 
             if include_saved_filter:
-                only_saved = st.checkbox(
-                    "Only saved by someone",
-                    value=False,
-                    key=f"{key_prefix}_saved",
+                saved_choice = st.selectbox(
+                    "Saved status",
+                    ["All papers", "Only saved by someone"],
+                    key=f"{key_prefix}_saved_select",
                 )
 
         with c3:
@@ -300,25 +311,59 @@ def apply_common_filters(
             haystack = out[search_cols].fillna("").agg(" ".join, axis=1).str.lower()
             out = out[haystack.str.contains(re.escape(search.lower()), na=False)].copy()
 
-    if only_abstracts and "abstract" in out.columns:
+    if abstract_choice == "Only papers with abstracts" and "abstract" in out.columns:
         out = out[out["abstract"].fillna("").str.strip() != ""].copy()
 
     if selected_journals and "journal" in out.columns:
         out = out[out["journal"].isin(selected_journals)].copy()
 
-    if include_saved_filter and only_saved:
+    if include_saved_filter and saved_choice == "Only saved by someone":
         out = add_saved_count(out)
         out = out[out["saved_count"] > 0].copy()
 
     return out
 
 
+def render_open_paper_link(link: str) -> None:
+    if not link:
+        return
+
+    safe_link = escape(link, quote=True)
+
+    st.markdown(
+        f"""
+        <a href="{safe_link}" target="_blank" rel="noopener noreferrer"
+           style="
+               display:inline-flex;
+               align-items:center;
+               justify-content:center;
+               margin-top:0.45rem;
+               margin-bottom:0.45rem;
+               padding:0.56rem 1.08rem;
+               border-radius:999px;
+               background:#244f8f;
+               color:#ffffff !important;
+               font-weight:750;
+               text-decoration:none;
+               border:1px solid rgba(36,79,143,0.24);
+               box-shadow:0 10px 24px rgba(36,79,143,0.20);
+           ">
+            Open paper
+        </a>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def render_save_box(row: pd.Series, key_prefix: str) -> None:
+    unique_key = text_value(row.get("unique_key", ""))
+    key_id = widget_key(unique_key)
+
     with st.expander("Save to personal list / add note", expanded=False):
         person = st.selectbox(
             "Person",
             list(PEOPLE.keys()),
-            key=f"{key_prefix}_person_{row['unique_key']}",
+            key=f"{key_prefix}_person_{key_id}",
         )
 
         keep_col = KEEP_COLUMNS[person]
@@ -327,13 +372,29 @@ def render_save_box(row: pd.Series, key_prefix: str) -> None:
         current_keep = bool(int(row.get(keep_col, 0) or 0))
         current_note = text_value(row.get(note_col, ""))
 
-        with st.form(key=f"{key_prefix}_form_{person}_{row['unique_key']}"):
-            keep = st.checkbox("Keep this paper", value=current_keep)
-            note = st.text_area("Personal note", value=current_note, height=90)
+        keep_options = ["No", "Yes"]
+        current_index = 1 if current_keep else 0
+
+        with st.form(key=f"{key_prefix}_form_{person}_{key_id}"):
+            keep_choice = st.selectbox(
+                "Keep this paper?",
+                keep_options,
+                index=current_index,
+                key=f"{key_prefix}_keep_select_{person}_{key_id}",
+            )
+
+            note = st.text_area(
+                "Personal note",
+                value=current_note,
+                height=90,
+                key=f"{key_prefix}_note_{person}_{key_id}",
+            )
+
             submitted = st.form_submit_button("Save")
 
             if submitted:
-                update_personal_choice(row["unique_key"], person, keep, note)
+                keep = keep_choice == "Yes"
+                update_personal_choice(unique_key, person, keep, note)
                 st.success(f"Saved for {person}.")
                 st.rerun()
 
@@ -353,7 +414,7 @@ def render_paper_card(
     link = paper_link(row)
 
     st.markdown("---")
-    st.markdown(f"### {title}")
+    st.markdown(f"### {escape(title)}")
 
     meta = " · ".join(
         [x for x in [journal or configured_journal, published_date[:10]] if x]
@@ -375,8 +436,7 @@ def render_paper_card(
     else:
         st.warning("No abstract available.")
 
-    if link:
-        st.link_button("Open paper", link)
+    render_open_paper_link(link)
 
     if show_all_notes:
         notes = note_items(row)
@@ -384,7 +444,7 @@ def render_paper_card(
         if notes:
             with st.expander("Team notes", expanded=False):
                 for name, note in notes:
-                    st.markdown(f"**{name}:** {note}")
+                    st.markdown(f"**{escape(name)}:** {escape(note)}")
 
     if show_save_box:
         render_save_box(row, key_prefix=key_prefix)
@@ -421,11 +481,10 @@ def render_paper_list(
 
     st.caption(f"{len(df):,} papers found.")
 
-    mode = st.radio(
+    mode = st.selectbox(
         "Display",
         ["Readable cards", "Compact table"],
-        horizontal=True,
-        key=f"{key_prefix}_display",
+        key=f"{key_prefix}_display_select",
     )
 
     if mode == "Compact table":
@@ -455,6 +514,7 @@ def render_paper_list(
             show_save_box=show_save_box,
             show_all_notes=show_all_notes,
         )
+
 
 def render_journal_family_page(
     title: str,
