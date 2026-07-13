@@ -279,6 +279,192 @@ def apply_global_style() -> None:
         hr {
             border-color: #e7e9f0 !important;
         }
+
+        /* Fix black clickable blocks, especially Filters expanders */
+        div[data-testid="stExpander"] {
+            background-color: #ffffff !important;
+            border: 1px solid #d8dee9 !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+        }
+
+        div[data-testid="stExpander"] details {
+            background-color: #ffffff !important;
+            border-radius: 12px !important;
+        }
+
+        div[data-testid="stExpander"] summary {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+            border-radius: 12px !important;
+            min-height: 2.6rem !important;
+        }
+
+        div[data-testid="stExpander"] summary:hover {
+            background-color: #f3f5fa !important;
+            color: #172033 !important;
+        }
+
+        div[data-testid="stExpander"] summary * {
+            color: #172033 !important;
+            background-color: transparent !important;
+        }
+
+        div[data-testid="stExpander"] svg {
+            fill: #172033 !important;
+            color: #172033 !important;
+        }
+
+        div[data-testid="stExpander"] div {
+            color: #172033 !important;
+        }
+
+        /* Fix forms */
+        div[data-testid="stForm"] {
+            background-color: #ffffff !important;
+            border: 1px solid #e7e9f0 !important;
+            border-radius: 14px !important;
+            padding: 0.75rem !important;
+        }
+
+        div[data-testid="stForm"],
+        div[data-testid="stForm"] * {
+            color: #172033 !important;
+        }
+
+        /* Fix input boxes */
+        input,
+        textarea,
+        div[data-baseweb="input"],
+        div[data-baseweb="textarea"],
+        div[data-baseweb="input"] > div,
+        div[data-baseweb="textarea"] > div {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+            border-color: #d8dee9 !important;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #687083 !important;
+            opacity: 1 !important;
+        }
+
+        /* Fix select boxes and dropdowns */
+        div[data-baseweb="select"] > div {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+            border-color: #d8dee9 !important;
+        }
+
+        div[data-baseweb="select"] *,
+        div[data-baseweb="popover"] *,
+        div[data-baseweb="menu"] * {
+            color: #172033 !important;
+        }
+
+        div[data-baseweb="popover"],
+        div[data-baseweb="menu"],
+        ul[role="listbox"],
+        div[role="listbox"] {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+        }
+
+        li[role="option"],
+        div[role="option"] {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+        }
+
+        li[role="option"]:hover,
+        div[role="option"]:hover {
+            background-color: #eaf1fb !important;
+            color: #172033 !important;
+        }
+
+        /* Fix checkboxes and radio buttons */
+        div[data-testid="stCheckbox"],
+        div[data-testid="stCheckbox"] *,
+        div[data-testid="stRadio"],
+        div[data-testid="stRadio"] * {
+            color: #172033 !important;
+        }
+
+        div[data-testid="stCheckbox"] label,
+        div[data-testid="stRadio"] label {
+            color: #172033 !important;
+        }
+
+        /* Fix sliders */
+        div[data-testid="stSlider"],
+        div[data-testid="stSlider"] * {
+            color: #172033 !important;
+        }
+
+        div[data-testid="stSlider"] div {
+            color: #172033 !important;
+        }
+
+        /* Fix tabs */
+        button[data-baseweb="tab"] {
+            background-color: transparent !important;
+            color: #172033 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        button[data-baseweb="tab"] * {
+            color: #172033 !important;
+        }
+
+        button[data-baseweb="tab"][aria-selected="true"] {
+            color: #244f8f !important;
+            border-bottom: 2px solid #244f8f !important;
+        }
+
+        button[data-baseweb="tab"][aria-selected="true"] * {
+            color: #244f8f !important;
+        }
+
+        /* Fix link buttons specifically */
+        a[data-testid="stLinkButton"] {
+            background-color: #244f8f !important;
+            color: #ffffff !important;
+            border-radius: 999px !important;
+            border: 1px solid rgba(36,79,143,0.24) !important;
+            text-decoration: none !important;
+        }
+
+        a[data-testid="stLinkButton"] * {
+            color: #ffffff !important;
+        }
+
+        a[data-testid="stLinkButton"]:hover {
+            background-color: #1f447b !important;
+            color: #ffffff !important;
+        }
+
+        /* Fix navigation hover / selected states */
+        [data-testid="stSidebarNav"] a,
+        [data-testid="stSidebarNav"] a * {
+            color: #172033 !important;
+        }
+
+        [data-testid="stSidebarNav"] a:hover {
+            background-color: #f3f5fa !important;
+            color: #172033 !important;
+        }
+
+        [data-testid="stSidebarNav"] a[aria-current="page"] {
+            background-color: #eaf1fb !important;
+            color: #244f8f !important;
+            border-radius: 10px !important;
+        }
+
+        [data-testid="stSidebarNav"] a[aria-current="page"] * {
+            color: #244f8f !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
