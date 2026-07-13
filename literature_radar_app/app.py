@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-import sqlite3
 from pathlib import Path
 
 import streamlit as st
 
-from src.config import DB_PATH
+from src.nav_pages import render_home_page, render_topic_page
 
-try:
-    from src.ui import apply_global_style
-except Exception:
-    apply_global_style = None
+
+ROOT = Path(__file__).resolve().parent
 
 
 st.set_page_config(
@@ -19,139 +16,106 @@ st.set_page_config(
     layout="wide",
 )
 
+
+try:
+    from src.ui import apply_global_style
+except Exception:
+    apply_global_style = None
+
 if apply_global_style:
     apply_global_style()
 
 
-def read_metrics() -> dict[str, int | str]:
-    if not Path(DB_PATH).exists():
-        return {
-            "papers": 0,
-            "with_abstract": 0,
-            "saved": 0,
-            "latest_update": "Not available",
-        }
-
-    with sqlite3.connect(DB_PATH) as conn:
-        total = conn.execute("SELECT COUNT(*) FROM papers").fetchone()[0]
-
-        with_abstract = conn.execute(
-            "SELECT COUNT(*) FROM papers WHERE COALESCE(TRIM(abstract), '') != ''"
-        ).fetchone()[0]
-
-        cols = [r[1] for r in conn.execute("PRAGMA table_info(papers)").fetchall()]
-        keep_cols = [c for c in cols if c.startswith("keep_")]
-
-        saved = 0
-        if keep_cols:
-            saved_expr = " + ".join([f"COALESCE({c}, 0)" for c in keep_cols])
-            saved = conn.execute(
-                f"SELECT COUNT(*) FROM papers WHERE ({saved_expr}) > 0"
-            ).fetchone()[0]
-
-        latest_update = "Not available"
-        if "fetched_at" in cols:
-            latest_update = conn.execute(
-                "SELECT MAX(fetched_at) FROM papers WHERE COALESCE(TRIM(fetched_at), '') != ''"
-            ).fetchone()[0] or "Not available"
-
-    return {
-        "papers": total,
-        "with_abstract": with_abstract,
-        "saved": saved,
-        "latest_update": latest_update,
-    }
+def journal_page(path: str) -> str:
+    return str(ROOT / path)
 
 
-metrics = read_metrics()
-
-st.title("📚 Literature Radar")
-st.write(
-    "A shared dashboard to find, read, and save papers that may be relevant for our research group."
-)
-
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("Papers in database", f"{metrics['papers']:,}")
-m2.metric("With abstracts", f"{metrics['with_abstract']:,}")
-m3.metric("Saved by team", f"{metrics['saved']:,}")
-m4.metric("Latest update", str(metrics["latest_update"])[:10])
-
-st.markdown("### Main sections")
-
-c1, c2, c3 = st.columns(3)
-
-with c1:
-    st.markdown("**Research topics**")
-    st.write("Preventive care")
-    st.write("Hypertension")
-    st.write("Mental models in health")
-
-with c2:
-    st.markdown("**Journal families**")
-    st.write("Econ journals")
-    st.write("Health journals")
-    st.write("General science journals")
-
-with c3:
-    st.markdown("**Team reading**")
-    st.write("Personal lists")
-    st.write("Team favorites")
-    st.write("Recent papers")
-
-st.markdown("### Journal coverage")
-
-with st.expander("Econ and development journals", expanded=False):
-    st.markdown(
-        """
-- American Economic Review
-- Quarterly Journal of Economics
-- Journal of Political Economy
-- Econometrica
-- Review of Economics and Statistics
-- American Economic Journal: Applied Economics
-- AER Insights
-- Journal of Development Economics
-"""
+def strongly_connected_page() -> None:
+    render_topic_page(
+        title="Strongly Connected",
+        score_col="score_strong",
+        subtitle="Papers that look most directly connected to the group's interests.",
+        key_prefix="strongly_connected_grouped",
     )
 
-with st.expander("Health economics journals", expanded=False):
-    st.markdown(
-        """
-- Journal of Health Economics
-- Health Economics
-- American Journal of Health Economics
-- European Journal of Health Economics
-"""
+
+def preventive_care_page() -> None:
+    render_topic_page(
+        title="Preventive Care",
+        score_col="score_preventive",
+        subtitle="Papers related to prevention, screening, diagnosis, primary care, and health-seeking behaviour.",
+        key_prefix="preventive_care_grouped",
     )
 
-with st.expander("Medical and global health journals", expanded=False):
-    st.markdown(
-        """
-- BMJ Global Health
-- The Lancet Global Health
-- PLOS Medicine
-- Social Science & Medicine
-- JAMA
-- JAMA Network Open
-- BMJ
-- The Lancet
-- New England Journal of Medicine
-- Nature Medicine
-"""
+
+def mental_models_page() -> None:
+    render_topic_page(
+        title="Mental Models Health",
+        score_col="score_mental_models",
+        subtitle="Papers related to beliefs, misconceptions, mental models, information, and health behaviour.",
+        key_prefix="mental_models_grouped",
     )
 
-with st.expander("General science and interdisciplinary journals", expanded=False):
-    st.markdown(
-        """
-- Nature
-- Nature Human Behaviour
-- Science
-- Science Advances
-- Science Translational Medicine
-- PNAS
-"""
+
+def hypertension_page() -> None:
+    render_topic_page(
+        title="Hypertension",
+        score_col="score_hypertension",
+        subtitle="Papers related to hypertension, blood pressure, screening, diagnosis, treatment, and adherence.",
+        key_prefix="hypertension_grouped",
     )
 
-st.info(
-    "Use the pages in the sidebar to browse papers. Personal notes and saved lists are stored in papers.db."
-)
+
+pages = {
+    "Home": [
+        st.Page(render_home_page, title="Home", icon="🏠", default=True),
+    ],
+    "Team's interest": [
+        st.Page(strongly_connected_page, title="Strongly Connected", icon="⭐"),
+        st.Page(preventive_care_page, title="Preventive Care", icon="🩺"),
+        st.Page(mental_models_page, title="Mental Models Health", icon="🧠"),
+        st.Page(hypertension_page, title="Hypertension", icon="❤️"),
+    ],
+    "Health Journal": [
+        st.Page(journal_page("pages/journals/bmj_global_health.py"), title="BMJ Global Health"),
+        st.Page(journal_page("pages/journals/the_lancet_global_health.py"), title="The Lancet Global Health"),
+        st.Page(journal_page("pages/journals/plos_medicine.py"), title="PLOS Medicine"),
+        st.Page(journal_page("pages/journals/social_science_medicine.py"), title="Social Science & Medicine"),
+        st.Page(journal_page("pages/journals/jama.py"), title="JAMA"),
+        st.Page(journal_page("pages/journals/jama_network_open.py"), title="JAMA Network Open"),
+        st.Page(journal_page("pages/journals/bmj.py"), title="BMJ"),
+        st.Page(journal_page("pages/journals/the_lancet.py"), title="The Lancet"),
+        st.Page(journal_page("pages/journals/new_england_journal_of_medicine.py"), title="New England Journal of Medicine"),
+        st.Page(journal_page("pages/journals/nature_medicine.py"), title="Nature Medicine"),
+    ],
+    "General Science Journals": [
+        st.Page(journal_page("pages/journals/nature.py"), title="Nature"),
+        st.Page(journal_page("pages/journals/nature_human_behaviour.py"), title="Nature Human Behaviour"),
+        st.Page(journal_page("pages/journals/science.py"), title="Science"),
+        st.Page(journal_page("pages/journals/science_advances.py"), title="Science Advances"),
+        st.Page(journal_page("pages/journals/science_translational_medicine.py"), title="Science Translational Medicine"),
+        st.Page(journal_page("pages/journals/pnas.py"), title="PNAS"),
+    ],
+    "Economics Journal": [
+        st.Page(journal_page("pages/journals/american_economic_review.py"), title="American Economic Review"),
+        st.Page(journal_page("pages/journals/quarterly_journal_of_economics.py"), title="Quarterly Journal of Economics"),
+        st.Page(journal_page("pages/journals/journal_of_political_economy.py"), title="Journal of Political Economy"),
+        st.Page(journal_page("pages/journals/econometrica.py"), title="Econometrica"),
+        st.Page(journal_page("pages/journals/review_of_economics_and_statistics.py"), title="Review of Economics and Statistics"),
+        st.Page(journal_page("pages/journals/aej_applied_economics.py"), title="AEJ: Applied Economics"),
+        st.Page(journal_page("pages/journals/aer_insights.py"), title="AER Insights"),
+        st.Page(journal_page("pages/journals/journal_of_development_economics.py"), title="Journal of Development Economics"),
+        st.Page(journal_page("pages/journals/journal_of_health_economics.py"), title="Journal of Health Economics"),
+        st.Page(journal_page("pages/journals/health_economics.py"), title="Health Economics"),
+        st.Page(journal_page("pages/journals/american_journal_of_health_economics.py"), title="American Journal of Health Economics"),
+        st.Page(journal_page("pages/journals/european_journal_of_health_economics.py"), title="European Journal of Health Economics"),
+    ],
+    "Work Area": [
+        st.Page(journal_page("pages/09_Team_Favorites.py"), title="Team Favorites", icon="⭐"),
+        st.Page(journal_page("pages/10_Personal_Lists.py"), title="Personal Lists", icon="👤"),
+    ],
+}
+
+
+pg = st.navigation(pages)
+pg.run()
