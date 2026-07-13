@@ -109,24 +109,92 @@ def looks_like_abstract(text: str) -> bool:
     return not any(x in lower for x in bad)
 
 
-def bmj_url_variants(url: str) -> list[str]:
-    url = clean_text(url)
+def get_bmj_article_id(row: dict) -> str:
+    text = " ".join(
+        [
+            clean_text(row.get("doi", "")),
+            clean_text(row.get("url", "")),
+        ]
+    )
 
-    if not url.startswith(("http://", "https://")):
-        return []
+    match = re.search(r"bmjgh-\d{4}-(\d+)", text, flags=re.I)
 
-    base = url.split("#")[0].rstrip("/")
-    variants = [base]
+    if not match:
+        return ""
 
-    host = urlparse(base).netloc.lower()
+    return "e" + match.group(1)
 
-    if "gh.bmj.com" in host and "/content/" in base:
-        if not base.endswith(".full"):
+
+def get_year_month(published_date: str) -> tuple[int | None, int | None]:
+    published_date = clean_text(published_date)
+
+    match = re.match(r"(\d{4})-(\d{1,2})", published_date)
+
+    if not match:
+        return None, None
+
+    year = int(match.group(1))
+    month = int(match.group(2))
+
+    if month < 1 or month > 12:
+        month = None
+
+    return year, month
+
+
+def bmj_volume_from_year(year: int) -> int:
+    return year - 2015
+
+
+def bmj_url_variants(row: dict) -> list[str]:
+    url = clean_text(row.get("url", ""))
+    doi = clean_text(row.get("doi", ""))
+    published_date = clean_text(row.get("published_date", ""))
+
+    variants = []
+
+    article_id = get_bmj_article_id(row)
+    year, month = get_year_month(published_date)
+
+    if article_id and year:
+        volume = bmj_volume_from_year(year)
+
+        issue_candidates = []
+
+        if month:
+            issue_candidates.append(month)
+
+        for issue in range(1, 13):
+            if issue not in issue_candidates:
+                issue_candidates.append(issue)
+
+        for issue in issue_candidates:
+            base = f"https://gh.bmj.com/content/{volume}/{issue}/{article_id}"
+            variants.append(base)
             variants.append(base + ".full")
+
+    for candidate in [url, doi]:
+        candidate = clean_text(candidate)
+
+        if not candidate:
+            continue
+
+        if candidate.startswith("10."):
+            candidate = "https://doi.org/" + candidate
+
+        if candidate.startswith(("http://", "https://")):
+            host = urlparse(candidate).netloc.lower()
+
+            if "gh.bmj.com" in host and "/content/" in candidate:
+                base = candidate.split("#")[0].rstrip("/")
+                variants.append(base)
+
+                if not base.endswith(".full"):
+                    variants.append(base + ".full")
 
     out = []
     for item in variants:
-        if item not in out:
+        if item and item not in out:
             out.append(item)
 
     return out
@@ -146,6 +214,7 @@ def extract_bmj_abstract(html: str) -> str:
         else:
             for bad in tag.select("script, style, nav, aside, figure, table, sup"):
                 bad.decompose()
+
             text = tag.get_text(" ", strip=True)
 
         abstract = clean_abstract(text)
@@ -180,8 +249,14 @@ def extract_bmj_abstract(html: str) -> str:
     return ""
 
 
-def scrape_bmj_abstract(url: str, session: requests.Session) -> str:
-    for candidate in bmj_url_variants(url):
+def scrape_bmj_abstract(row: dict, session: requests.Session) -> str:
+    candidates = bmj_url_variants(row)
+
+    if not candidates:
+        print("  No BMJ URL candidates")
+        return ""
+
+    for candidate in candidates:
         try:
             r = session.get(candidate, timeout=30, allow_redirects=True)
             r.raise_for_status()
@@ -202,7 +277,7 @@ def scrape_bmj_abstract(url: str, session: requests.Session) -> str:
 
 def get_missing_bmj_rows(limit: int) -> list[dict]:
     query = """
-    SELECT unique_key, title, journal, configured_journal, url, abstract
+    SELECT unique_key, title, journal, configured_journal, doi, url, published_date, abstract
     FROM papers
     WHERE
         (
@@ -211,9 +286,10 @@ def get_missing_bmj_rows(limit: int) -> list[dict]:
             OR lower(COALESCE(configured_journal, '')) LIKE '%bmj global health%'
             OR lower(COALESCE(configured_journal, '')) LIKE '%bmj glob health%'
             OR lower(COALESCE(url, '')) LIKE '%gh.bmj.com%'
+            OR lower(COALESCE(url, '')) LIKE '%bmjgh-%'
+            OR lower(COALESCE(doi, '')) LIKE '%bmjgh-%'
         )
         AND COALESCE(TRIM(abstract), '') = ''
-        AND COALESCE(TRIM(url), '') != ''
     ORDER BY published_date DESC
     LIMIT ?
     """
@@ -232,6 +308,8 @@ def update_abstract(unique_key: str, abstract: str) -> None:
                 source = CASE
                     WHEN COALESCE(source, '') LIKE '%bmj_abstract_scrape%'
                     THEN source
+                    WHEN COALESCE(source, '') = ''
+                    THEN 'bmj_abstract_scrape'
                     ELSE COALESCE(source, '') || '+bmj_abstract_scrape'
                 END
             WHERE unique_key = ?
@@ -249,22 +327,26 @@ def backfill(limit: int = 50, dry_run: bool = False) -> None:
     session = make_session()
     found = 0
 
-    for i, paper in enumerate(rows, start=1):
-        title = clean_text(paper.get("title", ""))
-        url = clean_text(paper.get("url", ""))
+    for i, row in enumerate(rows, start=1):
+        title = clean_text(row.get("title", ""))
+        doi = clean_text(row.get("doi", ""))
+        url = clean_text(row.get("url", ""))
+        published_date = clean_text(row.get("published_date", ""))
 
         print(f"\n{i}/{len(rows)}")
         print(title[:160])
-        print(url)
+        print(f"DOI: {doi}")
+        print(f"URL: {url}")
+        print(f"Published date: {published_date}")
 
-        abstract = scrape_bmj_abstract(url, session)
+        abstract = scrape_bmj_abstract(row, session)
 
         if abstract:
             found += 1
             print(f"  Abstract found: {len(abstract)} characters")
 
             if not dry_run:
-                update_abstract(paper["unique_key"], abstract)
+                update_abstract(row["unique_key"], abstract)
         else:
             print("  Still missing")
 
