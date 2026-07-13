@@ -1,0 +1,19 @@
+Corrections applied in this version
+
+1. Fixed the missing abstract_fetcher module.
+   In the uploaded ZIP, src/collectors.py imported src.abstract_fetcher, but abstract_fetcher.py was placed outside the app src folder. This made abstract backfilling fail. The file is now correctly located at src/abstract_fetcher.py.
+
+2. Added a targeted abstract fallback for BMJ Global Health and The Lancet Global Health.
+   The fallback first searches PubMed by DOI and title, then tries the article page if PubMed cannot provide an abstract.
+
+3. Improved PubMed collection.
+   PubMed search now also uses journal abbreviations such as BMJ Glob Health and Lancet Glob Health. PubMed XML abstract extraction now also checks OtherAbstract.
+
+4. Added a backfill script for old missing abstracts.
+   Use scripts/backfill_missing_abstracts.py or the home-page button "Backfill missing BMJ/Lancet abstracts".
+
+5. Made the app lighter.
+   Readable cards now show full abstracts inside an expander, so the page loads faster.
+
+6. Removed visible BibTeX display elements from the user interface.
+   The BibTeX table is no longer offered in display mode and the compact table no longer shows a BibTeX column.
