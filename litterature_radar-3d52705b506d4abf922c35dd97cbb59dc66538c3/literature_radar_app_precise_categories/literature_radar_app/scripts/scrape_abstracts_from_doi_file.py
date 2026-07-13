@@ -149,13 +149,42 @@ def url_variants(url: str) -> list[str]:
             variants.append(clean_base + "/fulltext")
             variants.append(clean_base + "/fulltext?rss=yes")
 
+    doi_match = re.search(
+        r"10\.1016/(S[0-9A-Z\-()]+)",
+        base,
+        flags=re.I,
+    )
+
+    if doi_match:
+        doi_suffix = doi_match.group(1)
+        variants.append(
+            f"https://www.thelancet.com/journals/langlo/article/PII{doi_suffix}/fulltext"
+        )
+        variants.append(
+            f"https://www.thelancet.com/journals/langlo/article/PII{doi_suffix}/fulltext?rss=yes"
+        )
+
+    pii_match = re.search(
+        r"/retrieve/pii/(S[0-9A-Z]+)",
+        base,
+        flags=re.I,
+    )
+
+    if pii_match:
+        clean_pii = pii_match.group(1)
+        variants.append(
+            f"https://www.thelancet.com/journals/langlo/article/PII{clean_pii}/fulltext"
+        )
+        variants.append(
+            f"https://www.thelancet.com/journals/langlo/article/PII{clean_pii}/fulltext?rss=yes"
+        )
+
     out = []
     for v in variants:
         if v not in out:
             out.append(v)
 
     return out
-
 
 def extract_from_meta_or_selectors(soup: BeautifulSoup) -> str:
     for selector in ABSTRACT_SELECTORS:
@@ -255,7 +284,7 @@ def scrape_abstract(url: str, session: requests.Session) -> dict:
             "status": f"could not open DOI: {exc}",
         }
 
-    candidates = url_variants(final_url)
+    candidates = []  for candidate_url in [start_url, final_url]:     for variant in url_variants(candidate_url):         if variant not in candidates:             candidates.append(variant)
 
     for candidate in candidates:
         tried.append(candidate)
