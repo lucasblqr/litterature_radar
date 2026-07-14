@@ -328,31 +328,7 @@ def render_open_paper_link(link: str) -> None:
     if not link:
         return
 
-    safe_link = escape(link, quote=True)
-
-    st.markdown(
-        f"""
-        <a href="{safe_link}" target="_blank" rel="noopener noreferrer"
-           style="
-               display:inline-flex;
-               align-items:center;
-               justify-content:center;
-               margin-top:0.45rem;
-               margin-bottom:0.45rem;
-               padding:0.56rem 1.08rem;
-               border-radius:999px;
-               background:#244f8f;
-               color:#ffffff !important;
-               font-weight:750;
-               text-decoration:none;
-               border:1px solid rgba(36,79,143,0.24);
-               box-shadow:0 10px 24px rgba(36,79,143,0.20);
-           ">
-            Open paper
-        </a>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.link_button("Open paper", link)
 
 
 def render_save_box(row: pd.Series, key_prefix: str) -> None:
@@ -480,16 +456,6 @@ def render_paper_list(
         return
 
     st.caption(f"{len(df):,} papers found.")
-
-    mode = st.selectbox(
-        "Display",
-        ["Readable cards", "Compact table"],
-        key=f"{key_prefix}_display_select",
-    )
-
-    if mode == "Compact table":
-        render_dataframe_summary(df)
-        return
 
     total = len(df)
     upper = min(max_cards, total)
