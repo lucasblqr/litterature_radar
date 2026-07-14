@@ -12,7 +12,7 @@ def apply_global_style() -> None:
         :root {
             --radar-bg: #f6f7fb;
             --radar-card: #ffffff;
-            --radar-border: #e7e9f0;
+            --radar-border: #d8dee9;
             --radar-text: #172033;
             --radar-muted: #687083;
             --radar-blue: #244f8f;
@@ -50,24 +50,7 @@ def apply_global_style() -> None:
         .stApp h5,
         .stApp h6,
         .stApp li {
-            color: #172033 !important;
-        }
-
-        [data-testid="stMarkdownContainer"],
-        [data-testid="stMarkdownContainer"] *,
-        [data-testid="stText"],
-        [data-testid="stText"] * {
-            color: #172033 !important;
-        }
-
-        section[data-testid="stSidebar"] {
-            background: #ffffff !important;
-            border-right: 1px solid var(--radar-border) !important;
-        }
-
-        section[data-testid="stSidebar"],
-        section[data-testid="stSidebar"] * {
-            color: #172033 !important;
+            color: #172033;
         }
 
         h1,
@@ -92,13 +75,23 @@ def apply_global_style() -> None:
             max-width: 1500px !important;
         }
 
+        section[data-testid="stSidebar"] {
+            background: #ffffff !important;
+            border-right: 1px solid var(--radar-border) !important;
+        }
+
+        section[data-testid="stSidebar"],
+        section[data-testid="stSidebar"] * {
+            color: #172033 !important;
+        }
+
         .radar-hero {
             padding: 1.45rem 1.65rem;
             border-radius: 22px;
             background:
                 radial-gradient(circle at top left, rgba(36,79,143,0.16), transparent 30%),
                 linear-gradient(135deg, #ffffff 0%, #f4f7fc 100%) !important;
-            border: 1px solid var(--radar-border);
+            border: 1px solid #e7e9f0;
             box-shadow: 0 16px 40px rgba(30, 42, 70, 0.07);
             margin-bottom: 1.2rem;
         }
@@ -127,7 +120,7 @@ def apply_global_style() -> None:
 
         .radar-card {
             background: #ffffff !important;
-            border: 1px solid var(--radar-border);
+            border: 1px solid #e7e9f0;
             border-radius: 18px;
             padding: 1.08rem 1.18rem;
             box-shadow: 0 12px 28px rgba(30, 42, 70, 0.055);
@@ -190,7 +183,7 @@ def apply_global_style() -> None:
 
         div[data-testid="stMetric"] {
             background: #ffffff !important;
-            border: 1px solid var(--radar-border) !important;
+            border: 1px solid #e7e9f0 !important;
             border-radius: 18px !important;
             padding: 1rem 1.1rem !important;
             box-shadow: 0 12px 28px rgba(30, 42, 70, 0.05) !important;
@@ -211,11 +204,43 @@ def apply_global_style() -> None:
             font-weight: 850 !important;
         }
 
+        div[data-testid="stExpander"] {
+            background-color: #ffffff !important;
+            border: 1px solid #d8dee9 !important;
+            border-radius: 14px !important;
+            overflow: hidden !important;
+        }
+
+        div[data-testid="stExpander"] details {
+            background-color: #ffffff !important;
+        }
+
+        div[data-testid="stExpander"] summary {
+            background-color: #ffffff !important;
+            color: #172033 !important;
+            min-height: 2.6rem !important;
+        }
+
+        div[data-testid="stExpander"] summary:hover {
+            background-color: #f3f5fa !important;
+        }
+
+        div[data-testid="stExpander"] summary * {
+            color: #172033 !important;
+        }
+
+        div[data-testid="stForm"] {
+            background-color: #ffffff !important;
+            border: 1px solid #e7e9f0 !important;
+            border-radius: 14px !important;
+            padding: 0.75rem !important;
+        }
+
         div[data-testid="stDataFrame"],
         div[data-testid="stDataEditor"] {
             border-radius: 18px !important;
             overflow: hidden !important;
-            border: 1px solid var(--radar-border) !important;
+            border: 1px solid #e7e9f0 !important;
             box-shadow: 0 12px 28px rgba(30, 42, 70, 0.05) !important;
             background: #ffffff !important;
         }
@@ -227,12 +252,6 @@ def apply_global_style() -> None:
         div[data-testid="stAlert"],
         div[data-testid="stAlert"] * {
             color: #172033 !important;
-        }
-
-        .radar-footer-note {
-            color: #687083 !important;
-            font-size: 0.88rem;
-            margin-top: 0.6rem;
         }
 
         [data-testid="stCaptionContainer"],
@@ -250,235 +269,14 @@ def apply_global_style() -> None:
             border-color: #e7e9f0 !important;
         }
 
-        /* Expander / filter boxes */
-        div[data-testid="stExpander"] {
-            background-color: #ffffff !important;
-            border: 1px solid #d8dee9 !important;
-            border-radius: 12px !important;
-            overflow: hidden !important;
-        }
-
-        div[data-testid="stExpander"] details {
-            background-color: #ffffff !important;
-            border-radius: 12px !important;
-        }
-
-        div[data-testid="stExpander"] summary {
-            background-color: #ffffff !important;
-            color: #172033 !important;
-            border-radius: 12px !important;
-            min-height: 2.6rem !important;
-        }
-
-        div[data-testid="stExpander"] summary:hover {
-            background-color: #f3f5fa !important;
-            color: #172033 !important;
-        }
-
-        div[data-testid="stExpander"] summary * {
-            color: #172033 !important;
-            background-color: transparent !important;
-        }
-
-        div[data-testid="stExpander"] svg {
-            fill: #172033 !important;
-            color: #172033 !important;
-            stroke: #172033 !important;
-        }
-
-        /* Forms */
-        div[data-testid="stForm"] {
-            background-color: #ffffff !important;
-            border: 1px solid #e7e9f0 !important;
-            border-radius: 14px !important;
-            padding: 0.75rem !important;
-        }
-
-        div[data-testid="stForm"],
-        div[data-testid="stForm"] * {
-            color: #172033 !important;
-        }
-
-        /* Text inputs and text areas */
-        input,
-        textarea,
-        div[data-baseweb="input"],
-        div[data-baseweb="textarea"],
-        div[data-baseweb="input"] *,
-        div[data-baseweb="textarea"] * {
-            background-color: #ffffff !important;
-            color: #172033 !important;
-            border-color: #d8dee9 !important;
-        }
-
-        input:focus,
-        textarea:focus,
-        div[data-baseweb="input"]:focus-within,
-        div[data-baseweb="textarea"]:focus-within {
-            border-color: #244f8f !important;
-            box-shadow: 0 0 0 1px #244f8f !important;
-            outline: none !important;
-        }
-
-        input::placeholder,
-        textarea::placeholder {
+        .radar-footer-note {
             color: #687083 !important;
-            opacity: 1 !important;
+            font-size: 0.88rem;
+            margin-top: 0.6rem;
         }
 
-        /* Select boxes: force every internal clickable piece to light */
-        div[data-baseweb="select"] {
-            background-color: #ffffff !important;
-            color: #172033 !important;
-        }
-
-        div[data-baseweb="select"] > div,
-        div[data-baseweb="select"] > div > div,
-        div[data-baseweb="select"] div,
-        div[data-baseweb="select"] span,
-        div[data-baseweb="select"] input {
-            background-color: #ffffff !important;
-            color: #172033 !important;
-            border-color: #d8dee9 !important;
-        }
-
-        div[data-baseweb="select"] svg,
-        div[data-baseweb="select"] path {
-            color: #172033 !important;
-            fill: #172033 !important;
-            stroke: #172033 !important;
-            background-color: transparent !important;
-        }
-
-        div[data-baseweb="select"] [role="button"],
-        div[data-baseweb="select"] [aria-haspopup="listbox"],
-        div[data-baseweb="select"] [data-baseweb="icon"],
-        div[data-baseweb="select"] div:last-child {
-            background-color: #ffffff !important;
-            color: #172033 !important;
-            border-color: #d8dee9 !important;
-        }
-
-        div[data-baseweb="popover"],
-        div[data-baseweb="menu"],
-        ul[role="listbox"],
-        div[role="listbox"] {
-            background-color: #ffffff !important;
-            color: #172033 !important;
-            border: 1px solid #d8dee9 !important;
-        }
-
-        div[data-baseweb="popover"] *,
-        div[data-baseweb="menu"] *,
-        ul[role="listbox"] *,
-        div[role="listbox"] * {
-            background-color: #ffffff !important;
-            color: #172033 !important;
-        }
-
-        li[role="option"],
-        div[role="option"] {
-            background-color: #ffffff !important;
-            color: #172033 !important;
-        }
-
-        li[role="option"]:hover,
-        div[role="option"]:hover {
-            background-color: #eaf1fb !important;
-            color: #172033 !important;
-        }
-
-        /* Multiselect tags */
-        span[data-baseweb="tag"],
-        span[data-baseweb="tag"] * {
-            background-color: #eaf1fb !important;
-            color: #244f8f !important;
-        }
-
-        /* Checkboxes, even if some old pages still use them */
-        div[data-testid="stCheckbox"],
-        div[data-testid="stCheckbox"] *,
-        div[data-testid="stCheckbox"] label,
-        div[data-testid="stCheckbox"] label * {
-            color: #172033 !important;
-        }
-
-        div[data-testid="stCheckbox"] [role="checkbox"] {
-            background-color: #ffffff !important;
-            border: 2px solid #244f8f !important;
-            border-radius: 5px !important;
-            box-shadow: none !important;
-        }
-
-        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] {
-            background-color: #244f8f !important;
-            border-color: #244f8f !important;
-        }
-
-        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] *,
-        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] svg,
-        div[data-testid="stCheckbox"] [role="checkbox"][aria-checked="true"] path {
-            color: #ffffff !important;
-            fill: #ffffff !important;
-            stroke: #ffffff !important;
-        }
-
-        /* Radio buttons, even if some old pages still use them */
-        div[data-testid="stRadio"],
-        div[data-testid="stRadio"] *,
-        div[data-testid="stRadio"] label {
-            color: #172033 !important;
-        }
-
-        div[data-testid="stRadio"] [role="radio"] {
-            background-color: #ffffff !important;
-            border: 2px solid #244f8f !important;
-            box-shadow: none !important;
-        }
-
-        div[data-testid="stRadio"] [role="radio"][aria-checked="true"] {
-            background-color: #244f8f !important;
-            border-color: #244f8f !important;
-        }
-
-        /* Sliders */
-        div[data-testid="stSlider"],
-        div[data-testid="stSlider"] * {
-            color: #172033 !important;
-        }
-
-        div[data-testid="stSlider"] [role="slider"] {
-            background-color: #244f8f !important;
-            border-color: #244f8f !important;
-        }
-
-        /* Tabs */
-        button[data-baseweb="tab"] {
-            background-color: transparent !important;
-            color: #172033 !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        button[data-baseweb="tab"] * {
-            color: #172033 !important;
-        }
-
-        button[data-baseweb="tab"][aria-selected="true"] {
-            color: #244f8f !important;
-            border-bottom: 2px solid #244f8f !important;
-        }
-
-        button[data-baseweb="tab"][aria-selected="true"] * {
-            color: #244f8f !important;
-        }
-
-        /* All Streamlit buttons */
         div[data-testid="stButton"] button,
         div[data-testid="stFormSubmitButton"] button,
-        button[data-testid*="baseButton"],
-        button[kind="primary"],
-        button[kind="secondary"],
         .stButton > button {
             border-radius: 999px !important;
             border: 1px solid rgba(36,79,143,0.24) !important;
@@ -491,19 +289,12 @@ def apply_global_style() -> None:
 
         div[data-testid="stButton"] button *,
         div[data-testid="stFormSubmitButton"] button *,
-        button[data-testid*="baseButton"] *,
-        button[kind="primary"] *,
-        button[kind="secondary"] *,
         .stButton > button * {
             color: #ffffff !important;
-            background-color: transparent !important;
         }
 
         div[data-testid="stButton"] button:hover,
         div[data-testid="stFormSubmitButton"] button:hover,
-        button[data-testid*="baseButton"]:hover,
-        button[kind="primary"]:hover,
-        button[kind="secondary"]:hover,
         .stButton > button:hover {
             background-color: #1f447b !important;
             color: #ffffff !important;
@@ -511,8 +302,7 @@ def apply_global_style() -> None:
         }
 
         div[data-testid="stButton"] button:disabled,
-        div[data-testid="stFormSubmitButton"] button:disabled,
-        button[data-testid*="baseButton"]:disabled {
+        div[data-testid="stFormSubmitButton"] button:disabled {
             background-color: #d8dee9 !important;
             color: #687083 !important;
             border-color: #d8dee9 !important;
@@ -520,50 +310,10 @@ def apply_global_style() -> None:
         }
 
         div[data-testid="stButton"] button:disabled *,
-        div[data-testid="stFormSubmitButton"] button:disabled *,
-        button[data-testid*="baseButton"]:disabled * {
+        div[data-testid="stFormSubmitButton"] button:disabled * {
             color: #687083 !important;
         }
 
-        /* Open paper link button */
-        div[data-testid="stLinkButton"] a,
-        div[data-testid="stLinkButton"] a:visited,
-        div[data-testid="stLinkButton"] a:hover,
-        div[data-testid="stLinkButton"] a:active,
-        a[data-testid="stLinkButton"],
-        a[data-testid="stLinkButton"]:visited,
-        a[data-testid="stLinkButton"]:hover,
-        a[data-testid="stLinkButton"]:active {
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            border-radius: 999px !important;
-            border: 1px solid rgba(36,79,143,0.24) !important;
-            background-color: #244f8f !important;
-            color: #ffffff !important;
-            font-weight: 750 !important;
-            padding: 0.56rem 1.08rem !important;
-            box-shadow: 0 10px 24px rgba(36,79,143,0.20) !important;
-            text-decoration: none !important;
-        }
-
-        div[data-testid="stLinkButton"] a *,
-        a[data-testid="stLinkButton"] *,
-        div[data-testid="stLinkButton"] p,
-        div[data-testid="stLinkButton"] span {
-            color: #ffffff !important;
-            background-color: transparent !important;
-        }
-
-        div[data-testid="stLinkButton"] a:hover,
-        a[data-testid="stLinkButton"]:hover {
-            background-color: #1f447b !important;
-            color: #ffffff !important;
-            border-color: rgba(36,79,143,0.4) !important;
-            text-decoration: none !important;
-        }
-
-        /* Sidebar navigation */
         [data-testid="stSidebarNav"] a,
         [data-testid="stSidebarNav"] a * {
             color: #172033 !important;
