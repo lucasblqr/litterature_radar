@@ -386,7 +386,7 @@ def render_paper_card(
     configured_journal = text_value(row.get("configured_journal", "")).strip()
     published_date = text_value(row.get("published_date", "")).strip()
     authors = short_text(row.get("authors", ""), 220)
-    abstract = short_text(row.get("abstract", ""), 1200)
+    abstract = text_value(row.get("abstract", "")).strip()
     link = paper_link(row)
 
     st.markdown("---")
