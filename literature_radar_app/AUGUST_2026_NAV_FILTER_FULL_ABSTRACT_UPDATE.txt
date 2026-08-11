@@ -1,0 +1,13 @@
+Literature Radar update — 11 August 2026
+
+Changes in this build:
+- Team's interest now contains only the three aggregate journal pages for journal browsing:
+  Health Journal, Econ Journal, General Science Journal.
+- Individual journal sections were removed from the sidebar.
+- Each aggregate journal page still starts from ALL papers in its journal family published in the last 60 days.
+- The standard Filters block is now available on those pages (search, abstract availability, saved status, journal).
+- Filters are optional; default selections do not remove papers.
+- Paper cards display the full stored abstract instead of truncating it at 1,200 characters.
+- Exact-ISSN economics collection from the previous build is retained.
+
+No paper database update is required just to use these interface changes.
