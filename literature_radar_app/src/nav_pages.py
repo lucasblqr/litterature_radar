@@ -165,9 +165,15 @@ def render_recent_journal_group_page(
         f"({cutoff.isoformat()} to {today.isoformat()}). No topic or ranking filters are applied."
     )
 
-    df = load_papers()
-    df = filter_by_journals(df, journal_names)
-    df = _filter_published_last_n_days(df, days)
+df = load_papers()
+df = filter_by_journals(df, journal_names)
+df = _filter_published_last_n_days(df, days)
+
+# User filters: search, abstract availability, saved status, journal
+df = apply_common_filters(
+    df,
+    key_prefix=f"{key_prefix}_filters",
+)
 
     render_paper_list(
         df,
