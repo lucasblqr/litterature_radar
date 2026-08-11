@@ -1,0 +1,148 @@
+journals:
+  - name: Nature Human Behaviour
+    aliases: ["Nature Human Behavior"]
+    group: broad_science
+    sources: ["crossref"]
+
+  - name: Nature Medicine
+    aliases: []
+    group: medical_broad_science
+    sources: ["pubmed", "crossref"]
+
+  - name: Nature
+    aliases: []
+    group: broad_science
+    sources: ["crossref"]
+
+  - name: Science
+    aliases: []
+    group: broad_science
+    sources: ["crossref"]
+
+  - name: Science Translational Medicine
+    aliases: []
+    group: medical_broad_science
+    sources: ["pubmed", "crossref"]
+
+  - name: Science Advances
+    aliases: []
+    group: broad_science
+    sources: ["crossref"]
+
+  - name: Proceedings of the National Academy of Sciences
+    short_name: PNAS
+    aliases:
+      - Proceedings of the National Academy of Sciences of the United States of America
+      - PNAS
+    group: broad_science
+    sources: ["pubmed", "crossref"]
+
+  - name: American Journal of Health Economics
+    aliases: []
+    group: health_econ_journals
+    sources: ["crossref"]
+
+  - name: The European Journal of Health Economics
+    short_name: European Journal of Health Economics
+    aliases: ["European Journal of Health Economics"]
+    group: health_econ_journals
+    sources: ["crossref"]
+
+  - name: Journal of Health Economics
+    aliases: []
+    group: health_econ_journals
+    sources: ["crossref"]
+
+  - name: Health Economics
+    aliases: []
+    group: health_econ_journals
+    sources: ["crossref"]
+
+  - name: American Economic Review
+    aliases: []
+    group: top_econ_journals
+    sources: ["crossref"]
+
+  - name: Quarterly Journal of Economics
+    aliases: ["The Quarterly Journal of Economics"]
+    group: top_econ_journals
+    sources: ["crossref"]
+
+  - name: Journal of Political Economy
+    aliases: []
+    group: top_econ_journals
+    sources: ["crossref"]
+
+  - name: Review of Economics and Statistics
+    aliases: ["The Review of Economics and Statistics"]
+    group: top_econ_journals
+    sources: ["crossref"]
+
+  - name: Econometrica
+    aliases: []
+    group: top_econ_journals
+    sources: ["crossref"]
+
+  - name: "American Economic Journal: Applied Economics"
+    aliases: ["AEJ: Applied Economics"]
+    group: applied_development_econ
+    sources: ["crossref"]
+
+  - name: "AER: Insights"
+    aliases: ["AER Insights"]
+    group: applied_development_econ
+    sources: ["crossref"]
+
+  - name: Journal of Development Economics
+    aliases: []
+    group: applied_development_econ
+    sources: ["crossref"]
+
+  - name: JAMA
+    aliases: ["Journal of the American Medical Association"]
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+  - name: JAMA Network Open
+    aliases: []
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+  - name: BMJ
+    aliases: ["The BMJ"]
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+  - name: BMJ Global Health
+    aliases: []
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+  - name: The Lancet
+    aliases: ["Lancet"]
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+  - name: Social Science & Medicine
+    aliases:
+      - Social Science and Medicine
+      - Social Science & Medicine
+      - Soc Sci Med
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+    
+  - name: The Lancet Global Health
+    aliases: ["Lancet Global Health"]
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+  - name: New England Journal of Medicine
+    aliases: ["The New England Journal of Medicine", "NEJM"]
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
+
+  - name: PLOS Medicine
+    aliases: ["PLoS Medicine", "Plos Medicine"]
+    group: medical_global_health
+    sources: ["pubmed", "crossref"]
