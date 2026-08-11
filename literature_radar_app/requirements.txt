@@ -4,3 +4,4 @@ requests>=2.32
 pyyaml>=6.0
 python-dateutil>=2.9
 beautifulsoup4>=4.12
+supabase>=2.0,<3
